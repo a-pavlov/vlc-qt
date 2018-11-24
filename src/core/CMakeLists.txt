@@ -63,6 +63,7 @@ SET(VLCQT_CORE_SRCS
     VideoDelegate.h
     VideoStream.cpp
     YUVVideoFrame.cpp
+    FileMediaStream.cpp
 
     ${VLCQT_CORE_SRCS_DEPRECATED}
 )
@@ -95,6 +96,7 @@ SET(VLCQT_CORE_HEADERS
     VideoDelegate.h
     VideoStream.h
     YUVVideoFrame.h
+    FileMediaStream.h
 
     ${VLCQT_CORE_HEADERS_DEPRECATED}
 

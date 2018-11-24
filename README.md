@@ -17,7 +17,7 @@ in cross-platform spirit so it may work on other systems but is not supported.
 or deprecated:**
  - Qt 4 support will be deprecated and removed in 2.0
  - Qt 5 lower than 5.5 will be deprecated and removed in 2.0
- - libVLC 2.1 will be required
+ - libVLC 3.0.0 will be required
 
 ## Binaries and source code
 You can download VLC-Qt binaries and sources from the

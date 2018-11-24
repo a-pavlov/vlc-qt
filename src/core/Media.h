@@ -45,6 +45,17 @@ class VLCQT_CORE_EXPORT VlcMedia : public QObject
 {
     Q_OBJECT
 public:
+    class VlcMemoryStream {
+    public:
+        virtual ~VlcMemoryStream(){}
+        virtual int open() = 0;
+        virtual void close() = 0;
+        virtual uint64_t totalBytes() = 0;
+        virtual ssize_t read(unsigned char* buf, size_t len) = 0;
+        virtual int seek(uint64_t) = 0;
+    };
+
+public:
     /*!
         \brief VlcMedia constructor.
 
@@ -57,6 +68,9 @@ public:
     explicit VlcMedia(const QString &location,
                       bool localFile,
                       VlcInstance *instance);
+
+    explicit VlcMedia(VlcMemoryStream* ms
+                      , VlcInstance* instance);
 
     /*!
         \brief VlcMedia constructor.
@@ -339,7 +353,8 @@ signals:
     void stateChanged(const Vlc::State &state);
 
 private:
-    void initMedia(const QString &location,
+    void initMedia(VlcMemoryStream* ms,
+                    const QString &location,
                    bool localFile,
                    VlcInstance *instance);
 

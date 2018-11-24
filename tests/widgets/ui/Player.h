@@ -29,6 +29,7 @@ namespace Ui
 class VlcInstance;
 class VlcMedia;
 class VlcMediaPlayer;
+class FileMediaStream;
 
 class Player : public QMainWindow
 {
@@ -44,6 +45,7 @@ private:
     VlcInstance *_instance;
     VlcMedia *_media;
     VlcMediaPlayer *_player;
+    FileMediaStream* _media_stream;
 };
 
 #endif // VLCQT_TEST_PLAYER_H_

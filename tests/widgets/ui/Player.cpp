@@ -21,6 +21,7 @@
 #include "core/Instance.h"
 #include "core/Media.h"
 #include "core/MediaPlayer.h"
+#include "core/FileMediaStream.h"
 
 #include "Player.h"
 #include "ui_Player.h"
@@ -47,7 +48,9 @@ Player::Player(VlcInstance *instance,
     connect(ui->pause, SIGNAL(toggled(bool)), _player, SLOT(togglePause()));
     connect(ui->stop, SIGNAL(clicked()), _player, SLOT(stop()));
 
-    _media = new VlcMedia("http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_surround-fix.avi", _instance);
+    //_media = new VlcMedia("/home/inkpot/Downloads/BigBuckBunny_512kb.mp4", true, _instance);
+    _media_stream = new FileMediaStream("/home/inkpot/Downloads/BigBuckBunny_512kb.mp4");
+    _media = new VlcMedia(_media_stream, instance);
     _player->open(_media);
 }
 
@@ -61,4 +64,5 @@ Player::~Player()
     }
     delete _instance;
     delete ui;
+    delete _media_stream;
 }

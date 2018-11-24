@@ -31,14 +31,19 @@ VlcMedia::VlcMedia(const QString &location,
                    VlcInstance *instance)
     : QObject(instance)
 {
-    initMedia(location, localFile, instance);
+    initMedia(nullptr, location, localFile, instance);
 }
 
 VlcMedia::VlcMedia(const QString &location,
                    VlcInstance *instance)
     : QObject(instance)
 {
-    initMedia(location, false, instance);
+    initMedia(nullptr, location, false, instance);
+}
+
+VlcMedia::VlcMedia(VlcMemoryStream* ms
+                   , VlcInstance* instance) {
+    initMedia(ms, QString(), false, instance);
 }
 
 VlcMedia::VlcMedia(libvlc_media_t *media)
@@ -63,20 +68,60 @@ libvlc_media_t *VlcMedia::core()
     return _vlcMedia;
 }
 
-void VlcMedia::initMedia(const QString &location,
+int vlc_mem_seek(void *opaque, uint64_t offset) {
+    VlcMedia::VlcMemoryStream* ms = static_cast<VlcMedia::VlcMemoryStream*>(opaque);
+    Q_ASSERT(ms != nullptr);
+    return ms->seek(offset);
+}
+
+int vlc_mem_open(void* opaque, void** datap, uint64_t* sizep) {
+    VlcMedia::VlcMemoryStream* ms = static_cast<VlcMedia::VlcMemoryStream*>(opaque);
+    Q_ASSERT(ms != nullptr);
+    *sizep = ms->totalBytes();
+    *datap = ms;
+    return ms->open();
+}
+
+void vlc_mem_close(void* opaque) {
+    VlcMedia::VlcMemoryStream* ms = static_cast<VlcMedia::VlcMemoryStream*>(opaque);
+    Q_ASSERT(ms != nullptr);
+    ms->close();
+}
+
+ssize_t vlc_mem_read(void *opaque, unsigned char* buf, size_t len) {
+    VlcMedia::VlcMemoryStream* ms = static_cast<VlcMedia::VlcMemoryStream*>(opaque);
+    Q_ASSERT(ms != nullptr);
+    return ms->read(buf, len);
+}
+
+
+
+void VlcMedia::initMedia(VlcMemoryStream* ms,
+                        const QString &location,
                          bool localFile,
                          VlcInstance *instance)
 {
     _currentLocation = location;
-    QString l = location;
-    if (localFile)
-        l = QDir::toNativeSeparators(l);
 
-    // Create a new libvlc media descriptor from location
-    if (localFile)
-        _vlcMedia = libvlc_media_new_path(instance->core(), l.toUtf8().data());
-    else
-        _vlcMedia = libvlc_media_new_location(instance->core(), l.toUtf8().data());
+    if (!ms) {
+        QString l = location;
+        if (localFile)
+            l = QDir::toNativeSeparators(l);
+
+        // Create a new libvlc media descriptor from location
+        if (localFile)
+            _vlcMedia = libvlc_media_new_path(instance->core(), l.toUtf8().data());
+        else
+            _vlcMedia = libvlc_media_new_location(instance->core(), l.toUtf8().data());
+
+    } else {
+        _vlcMedia = libvlc_media_new_callbacks(instance->core()
+                                              , &vlc_mem_open
+                                              , &vlc_mem_read
+                                              , &vlc_mem_seek
+                                              , &vlc_mem_close
+                                              , ms);
+    }
 
     _vlcEvents = libvlc_media_event_manager(_vlcMedia);
 
